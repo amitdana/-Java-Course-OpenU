@@ -2,7 +2,6 @@ import java.util.Scanner;
 /** 
  * ex 14
  * 
- * @author Amit Dana (322519604)
  * @version 5.01.2021
  */
 public class Ex14
