@@ -1,0 +1,280 @@
+
+/**
+ * BigNumber class
+ * @version 19.01.2021
+ */
+public class BigNumber 
+ {
+     private IntNode _head;
+     
+    //from intList class
+    private void addToEnd(IntNode node) {
+      if (this._head==null)
+            this._head = node;
+      else {
+           IntNode ptr = _head;
+           while (ptr.getNext( ) != null)
+                ptr = ptr.getNext( );
+           ptr.setNext(node);
+        }
+    }
+    
+    //from intList class
+    private IntNode predecessor(IntNode node) {
+        if(_head == null || _head == node)
+            return null;
+        IntNode behind = _head;
+        while(behind.getNext() != null) {
+            if(behind.getNext() == node) 
+                return behind;
+            else 
+                behind = behind.getNext();
+        }
+        return null;
+    }
+    
+    //from intList class
+    public boolean isEmpty() {
+        return _head == null;
+    }
+     
+    
+    //from intList class    
+    private int length() {
+        IntNode temp = _head;
+        int count = 0;
+        while(temp != null) {
+            count++;
+            temp = temp.getNext();
+        }
+        return count;
+    }
+    
+    // constractors
+     public BigNumber ()
+     {
+         _head= new IntNode (0);
+     }
+    
+     public BigNumber (long num)
+     {
+        this._head = new IntNode((int)(num%10));
+        num = num / 10;
+        IntNode temp = _head;
+        while(num != 0)
+		{
+            temp.setNext(new IntNode((int)(num%10)));
+            temp = temp.getNext();
+            num = num / 10;
+      }
+    }
+     
+    public BigNumber(BigNumber other){
+        this._head = new IntNode(other._head.getValue());
+        IntNode tempOther = other._head.getNext();
+        IntNode temp = this._head;
+        while(tempOther.getNext() != null){
+            temp.setNext(new IntNode(tempOther.getValue()));
+            tempOther = tempOther.getNext();
+            temp = temp.getNext();
+        }
+        temp.setNext(new IntNode(tempOther.getValue()));
+    }
+    
+    //end constractors
+    
+    /**
+     * method that turns the list into a string that represents a number
+     * @return a string that represents a number
+     */
+     public String toString ()
+     {
+         return toString (_head,"");
+        
+     }
+     
+    private String toString (IntNode temp,String s1)
+    {
+        if (temp.getNext()==null)
+            return s1 + temp.getValue();
+        s1= toString(temp.getNext(), s1) + temp.getValue (); 
+        return s1;
+          
+    }
+     
+    /**
+     *  method that compares 2 lists that represent a number
+     *  @param other the object to compare
+     * @return if the numbers equals
+     */
+     public int compareTo (BigNumber other)
+     {
+         String s1= this.toString();
+         String s2= other.toString();
+
+         if (s2.length() > s1.length())
+               return -1;
+         if (other.toString().length() < this.toString().length())
+               return 1;
+         else //other.length == this.length
+          {
+              for (int i=0; i<s1.length(); i++)
+              {
+                  if (s1.charAt(i) < s2.charAt(i))
+                        return -1;
+                  if (this.toString().charAt (0) >other.toString().charAt(0))
+                        return 1;
+                  
+              }           
+           return 0;
+        }
+    }
+    
+    /**
+     * The method of connecting two large numbers. The connection returns a new object as a result
+     * @param other the object to sum with this list
+     * @return returns a new object as a result
+     */
+     public BigNumber addBigNumber(BigNumber other)
+     {
+        BigNumber sumNumbers;
+        if (other.length() >= this.length())
+        {
+            sumNumbers = new BigNumber(other);
+            sumNumbers = sumNumbers(sumNumbers, this);
+        }
+        else
+        {
+            sumNumbers = new BigNumber(this);
+            sumNumbers = sumNumbers(sumNumbers, other);
+        }
+        return sumNumbers;
+    }
+
+    private BigNumber sumNumbers(BigNumber bigger, BigNumber smaller)
+    {
+        int sum = 0;
+        IntNode big = bigger._head;
+        IntNode small = smaller._head;
+        while(small != null)
+        {
+            sum += small.getValue() + big.getValue();
+            big.setValue(sum%10);
+            sum /= 10;
+            big = big.getNext();
+            small = small.getNext();
+        }
+        if(big != null)
+        {
+            if(sum > 0 && sum + big.getValue() < 10)
+                big.setValue(sum + big.getValue());
+            else if(sum > 0){
+                bigger.addToEnd(new IntNode(sum));
+            }
+        }
+        return bigger;
+    }
+
+    /**
+     * The method of connecting a large number object and another long number.
+     * @param num the object to sum with this list
+     * @return returns a new object as a result
+     */
+    public BigNumber addLong(long num)
+    {
+        return this.addBigNumber(new BigNumber(num));
+    }
+
+    /**
+     * The subtraction method of two large numbers
+     * @param other the object to sub with this object
+     * @return returns a new object as a result
+     */
+    public BigNumber subtractBigNumber(BigNumber other)
+    {
+        BigNumber sub;
+        if(this.compareTo(other) != -1)
+        {
+            sub = new BigNumber(this);
+            sub = subNums(sub, other);
+        }
+        else
+        {
+            sub = new BigNumber(other);
+            sub = subNums(sub, this);
+        }
+        return sub;
+    }
+
+     private BigNumber subNums(BigNumber big, BigNumber small){
+        IntNode biggerNum = big._head;
+        IntNode smallerNum = small._head;
+        while(smallerNum != null)
+        {
+            if(biggerNum.getValue() - smallerNum.getValue() >= 0)
+                 biggerNum.setValue(biggerNum.getValue() - smallerNum.getValue());
+            else 
+            {
+                biggerNum.setValue((biggerNum.getValue() + 10) - smallerNum.getValue());
+                biggerNum.getNext().setValue(biggerNum.getNext().getValue() - 1);
+            }            
+            biggerNum = biggerNum.getNext();
+            smallerNum = smallerNum.getNext();
+        }
+        return outNumZero(big);
+    }
+
+    
+    private BigNumber outNumZero(BigNumber bigNumber)
+    {
+        IntNode tempBigNumber = bigNumber._head;
+        while(tempBigNumber.getNext() != null) 
+            tempBigNumber = tempBigNumber.getNext();
+        while(tempBigNumber.getValue() == 0 && tempBigNumber != bigNumber._head){
+            tempBigNumber = bigNumber.predecessor(tempBigNumber);
+            tempBigNumber.setNext(null);
+        }
+        return bigNumber;
+    }
+
+    /**
+     * The multiplication method of two large numbers
+     * @param other the object to mult with this object
+     * @return returns a new object as a result
+     */
+    public BigNumber multBigNumber(BigNumber other)
+    {
+        String s1= this.toString();
+        String s2= other.toString();
+        BigNumber mult = new BigNumber();
+        int carry, multResult = 0; 
+        int max = s1.length() + s2.length() + 1;
+        IntNode temp1 = this._head, temp2 = other._head;
+        
+        for(int i = 0; i < max - 1; i ++)
+            mult.addToEnd(new IntNode(0));
+        IntNode tempMult1 = mult._head, tempMult2;;
+        while(temp2 != null)
+        {
+            carry = 0;
+            tempMult2 = tempMult1;
+            temp1 = this._head;
+            while(temp1 != null)
+            {
+                multResult = temp2.getValue() * temp1.getValue() + carry;
+                tempMult2.setValue(tempMult2.getValue() + (multResult % 10));
+                carry = (multResult / 10) + (tempMult2.getValue() / 10);
+                tempMult2.setValue(tempMult2.getValue() % 10);
+                temp1 = temp1.getNext();
+                tempMult2 = tempMult2.getNext();
+            }
+            if(carry > 0)
+                tempMult2.setValue(tempMult2.getValue() + carry);
+            temp2 = temp2.getNext();
+            tempMult1 = tempMult1.getNext();
+        }
+        return outNumZero(mult);
+    }
+
+}
+      
